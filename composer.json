@@ -1,0 +1,12 @@
+{
+    "name": "genesis/behat-stats-log-extension",
+    "description": "Display a tree line of the time it takes to get through all the scenarios.",
+    "require-dev": {
+        "behat/behat": "~3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Genesis\\Testing\\Stats\\": "./src"
+        }
+    }
+}
