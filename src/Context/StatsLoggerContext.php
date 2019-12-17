@@ -4,13 +4,12 @@ namespace Genesis\Testing\Stats\Context;
 
 use Behat\Behat\Context\Context;
 
-/**
- * StatsLogger class.
- */
-class StatsLoggerContext implements Context
+class StatsLogContext implements Context
 {
     private static $snapshots = [];
     private static $display = [];
+    private static $filePath = '/../../report/timestats.json';
+    private static $currentScenario = null;
 
     /**
      * @BeforeSuite
@@ -39,6 +38,7 @@ class StatsLoggerContext implements Context
         self::$display[$suite]['time'] = $stats['final'];
 
         print_r(self::$display);
+        file_put_contents(__DIR__ . self::$filePath, json_encode(self::$display));
     }
 
     /**
@@ -78,6 +78,7 @@ class StatsLoggerContext implements Context
         $suite = $scope->getSuite()->getName();
         $feature = basename($scope->getFeature()->getFile());
         $scenario = $scope->getScenario()->getTitle();
+        self::$currentScenario = $scenario;
 
         self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario] = [
             'start' => microtime(true),
@@ -98,7 +99,40 @@ class StatsLoggerContext implements Context
         $stats['final'] = self::getDiffInSeconds($stats['start'], $stats['end']);
 
         self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario] = $stats;
-        self::$display[$suite]['features'][$feature]['scenarios'][$scenario] = $stats['final'];
+        self::$display[$suite]['features'][$feature]['scenarios'][$scenario]['time'] = $stats['final'];
+    }
+
+    /**
+     * @BeforeStep
+     */
+    public function beforeStepSnapshot($scope)
+    {
+        $suite = $scope->getSuite()->getName();
+        $feature = basename($scope->getFeature()->getFile());
+        $scenario = self::$currentScenario;
+        $step = $scope->getStep()->getText();
+
+        self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario]['steps'][$step] = [
+            'start' => microtime(true),
+        ];
+    }
+
+    /**
+     * @AfterStep
+     */
+    public function afterStepSnapshot($scope)
+    {
+        $suite = $scope->getSuite()->getName();
+        $feature = basename($scope->getFeature()->getFile());
+        $scenario = self::$currentScenario;
+        $step = $scope->getStep()->getText();
+
+        $stats = self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario]['steps'][$step];
+        $stats['end'] = microtime(true);
+        $stats['final'] = self::getDiffInSeconds($stats['start'], $stats['end']);
+
+        self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario]['steps'][$step] = $stats;
+        self::$display[$suite]['features'][$feature]['scenarios'][$scenario]['steps'][$step] = $stats['final'];
     }
 
     private static function getDiffInSeconds($start, $end)
