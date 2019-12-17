@@ -8,8 +8,14 @@ class StatsLogContext implements Context
 {
     private static $snapshots = [];
     private static $display = [];
-    private static $filePath = '/../../report/timestats.json';
+    private static $filePath = null;
     private static $currentScenario = null;
+
+    public function __construct($filePath, $printToScreen = false)
+    {
+        self::$filePath = $filePath;
+        self::$printToScreen = $printToScreen;
+    }
 
     /**
      * @BeforeSuite
@@ -37,8 +43,11 @@ class StatsLogContext implements Context
         self::$snapshots[$suite] = $stats;
         self::$display[$suite]['time'] = $stats['final'];
 
-        print_r(self::$display);
-        file_put_contents(__DIR__ . self::$filePath, json_encode(self::$display));
+        if ($printToScreen) {
+            print_r(self::$display);
+        }
+
+        file_put_contents(self::$filePath . '/stats.json', json_encode(self::$display));
     }
 
     /**

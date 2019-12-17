@@ -12,5 +12,7 @@ default:
     suites:
         default:
             contexts:
-                - Genesis\Testing\Stats\StatsLoggerContext
+                - Genesis\Testing\Stats\StatsLoggerContext:
+                    filePath: test/report/
+                    printToScreen: true
 ```
