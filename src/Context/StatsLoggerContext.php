@@ -8,6 +8,7 @@ class StatsLogContext implements Context
 {
     private static $snapshots = [];
     private static $display = [];
+    private static $printToScreen = false;
     private static $filePath = null;
     private static $currentScenario = null;
 
@@ -15,6 +16,11 @@ class StatsLogContext implements Context
     {
         self::$filePath = $filePath;
         self::$printToScreen = $printToScreen;
+        
+        
+        if (self::$filePath && !is_dir(self::$filePath)) {
+            mkdir(self::$filePath, 0777, true);
+        }
     }
 
     /**
@@ -43,11 +49,13 @@ class StatsLogContext implements Context
         self::$snapshots[$suite] = $stats;
         self::$display[$suite]['time'] = $stats['final'];
 
-        if ($printToScreen) {
+        if (self::$printToScreen) {
             print_r(self::$display);
         }
 
-        file_put_contents(self::$filePath . '/stats.json', json_encode(self::$display));
+        if (self::$filePath) {
+            file_put_contents(self::$filePath . '/stats.json', json_encode(self::$display));
+        }
     }
 
     /**
