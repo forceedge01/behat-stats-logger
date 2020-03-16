@@ -36,7 +36,13 @@ trait SuiteTimeTrait
 
         if (self::$filePath) {
             file_put_contents(self::$filePath . '/stats.json', json_encode(self::$display));
+            file_put_contents(self::$filePath . self::getName($suite), json_encode(self::$steps));
         }
+    }
+
+    private static function getName($suiteName)
+    {
+        return '/steps-' . str_replace(' ', '-', $suiteName) . '.json';
     }
 
     public static function generateOutput(array $display)
