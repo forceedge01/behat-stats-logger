@@ -1,6 +1,8 @@
 Installation
 -------------
 
+![After](https://github.com/forceedge01/behat-stats-logger/blob/master/assets/stats.png?raw=true#version=1)
+
 ```
 composer require --dev genesis/behat-stats-logger
 ```
