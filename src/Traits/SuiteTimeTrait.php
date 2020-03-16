@@ -42,19 +42,19 @@ trait SuiteTimeTrait
     public static function generateOutput(array $display)
     {
         foreach ($display as $suite => $suiteTimes) {
-            self::printLine(sprintf('Suite: %s - %s', $suiteTimes['time'], $suite));
+            self::printLine(sprintf('Suite >>> [%s] - %s', $suiteTimes['time'], $suite));
             foreach ($suiteTimes['features'] as $feature => $featureTimes) {
                 self::tab(1);
-                self::printLine(sprintf('Feature: %s - %s', $featureTimes['time'], $feature));
+                self::printLine(sprintf('Feature >>> [%s] - %s', $featureTimes['time'], $feature));
                 foreach ($featureTimes['scenarios'] as $scenario => $scenarioTimes) {
                     self::tab(2);
-                    self::printLine(sprintf('Scenario: %s - %s', $scenarioTimes['time'], $scenario));
+                    self::printLine(sprintf('Scenario >>> [%s] - %s', $scenarioTimes['time'], $scenario));
                     foreach ($scenarioTimes['steps'] as $step => $stepTimes) {
                         self::tab(3);
                         self::printLine(sprintf('Step: %s', $step));
-                        foreach ($stepTimes as $time) {
+                        foreach ($stepTimes as $index => $time) {
                             self::tab(4);
-                            self::printLine(sprintf('Time: %s', $time));
+                            self::printLine(sprintf('%d: %s', $index + 1, $time));
                         }
                     }
                     self::newline();
