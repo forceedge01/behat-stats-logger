@@ -7,7 +7,7 @@ composer require --dev genesis/behat-stats-logger
 
 Add to your behat.yml file
 
-```
+```yml
 default:
     suites:
         default:
