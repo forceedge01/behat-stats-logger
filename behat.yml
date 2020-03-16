@@ -1,0 +1,18 @@
+default:
+    suites:
+        suite-1:
+            paths:
+                - %paths.base%/features/suite-1
+            contexts:
+                - FeatureContext
+                - Genesis\Stats\Context\StatsLoggerContext:
+                    filePath: test/report/
+                    printToScreen: true
+        suite-2:
+            paths:
+                - %paths.base%/features/suite-2
+            contexts:
+                - FeatureContext
+                - Genesis\Stats\Context\StatsLoggerContext:
+                    filePath: test/report/
+                    printToScreen: true

@@ -1,158 +1,33 @@
 <?php
 
-namespace Genesis\Testing\Stats\Context;
+namespace Genesis\Stats\Context;
 
 use Behat\Behat\Context\Context;
+use Genesis\Stats\Traits;
 
-class StatsLogContext implements Context
+class StatsLoggerContext implements Context
 {
+    use Traits\SuiteTimeTrait;
+    use Traits\FeatureTimeTrait;
+    use Traits\ScenarioTimeTrait;
+    use Traits\StepTimerTrait;
+
     private static $snapshots = [];
     private static $display = [];
     private static $printToScreen = false;
     private static $filePath = null;
-    private static $currentScenario = null;
 
     public function __construct($filePath, $printToScreen = false)
     {
         self::$filePath = $filePath;
         self::$printToScreen = $printToScreen;
-        
-        
+
         if (self::$filePath && !is_dir(self::$filePath)) {
             mkdir(self::$filePath, 0777, true);
         }
     }
 
-    /**
-     * @BeforeSuite
-     */
-    public static function beforeTimeSnapshot($scope)
-    {
-        $suite = $scope->getSuite()->getName();
-
-        self::$snapshots[$suite] = [
-            'start' => microtime(true),
-        ];
-    }
-
-    /**
-     * @AfterSuite
-     */
-    public static function afterSuiteSnapshot($scope)
-    {
-        $suite = $scope->getSuite()->getName();
-
-        $stats = self::$snapshots[$suite];
-        $stats['end'] = microtime(true);
-        $stats['final'] = self::getDiffInSeconds($stats['start'], $stats['end']);
-
-        self::$snapshots[$suite] = $stats;
-        self::$display[$suite]['time'] = $stats['final'];
-
-        if (self::$printToScreen) {
-            print_r(self::$display);
-        }
-
-        if (self::$filePath) {
-            file_put_contents(self::$filePath . '/stats.json', json_encode(self::$display));
-        }
-    }
-
-    /**
-     * @BeforeFeature
-     */
-    public static function beforeFeatureSnapshot($scope)
-    {
-        $suite = $scope->getSuite()->getName();
-        $feature = basename($scope->getFeature()->getFile());
-
-        self::$snapshots[$suite]['features'][$feature] = [
-            'start' => microtime(true),
-        ];
-    }
-
-    /**
-     * @AfterFeature
-     */
-    public static function afterFeatureSnapshot($scope)
-    {
-        $suite = $scope->getSuite()->getName();
-        $feature = basename($scope->getFeature()->getFile());
-
-        $stats = self::$snapshots[$suite]['features'][$feature];
-        $stats['end'] = microtime(true);
-        $stats['final'] = self::getDiffInSeconds($stats['start'], $stats['end']);
-
-        self::$snapshots[$suite]['features'][$feature] = $stats;
-        self::$display[$suite]['features'][$feature]['time'] = $stats['final'];
-    }
-
-    /**
-     * @BeforeScenario
-     */
-    public static function beforeScenarioSnapshot($scope)
-    {
-        $suite = $scope->getSuite()->getName();
-        $feature = basename($scope->getFeature()->getFile());
-        $scenario = $scope->getScenario()->getTitle();
-        self::$currentScenario = $scenario;
-
-        self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario] = [
-            'start' => microtime(true),
-        ];
-    }
-
-    /**
-     * @AfterScenario
-     */
-    public static function afterScenarioSnapshot($scope)
-    {
-        $suite = $scope->getSuite()->getName();
-        $feature = basename($scope->getFeature()->getFile());
-        $scenario = $scope->getScenario()->getTitle();
-
-        $stats = self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario];
-        $stats['end'] = microtime(true);
-        $stats['final'] = self::getDiffInSeconds($stats['start'], $stats['end']);
-
-        self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario] = $stats;
-        self::$display[$suite]['features'][$feature]['scenarios'][$scenario]['time'] = $stats['final'];
-    }
-
-    /**
-     * @BeforeStep
-     */
-    public function beforeStepSnapshot($scope)
-    {
-        $suite = $scope->getSuite()->getName();
-        $feature = basename($scope->getFeature()->getFile());
-        $scenario = self::$currentScenario;
-        $step = $scope->getStep()->getText();
-
-        self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario]['steps'][$step] = [
-            'start' => microtime(true),
-        ];
-    }
-
-    /**
-     * @AfterStep
-     */
-    public function afterStepSnapshot($scope)
-    {
-        $suite = $scope->getSuite()->getName();
-        $feature = basename($scope->getFeature()->getFile());
-        $scenario = self::$currentScenario;
-        $step = $scope->getStep()->getText();
-
-        $stats = self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario]['steps'][$step];
-        $stats['end'] = microtime(true);
-        $stats['final'] = self::getDiffInSeconds($stats['start'], $stats['end']);
-
-        self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario]['steps'][$step] = $stats;
-        self::$display[$suite]['features'][$feature]['scenarios'][$scenario]['steps'][$step] = $stats['final'];
-    }
-
-    private static function getDiffInSeconds($start, $end)
+    public static function getDiffInSeconds($start, $end)
     {
         $diff = $end - $start;
         $sec = intval($diff);
