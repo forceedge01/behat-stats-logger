@@ -33,9 +33,11 @@ trait ScenarioTimeTrait
         $stats = self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario];
         $stats['end'] = microtime(true);
         $stats['final'] = self::getDiffInSeconds($stats['start'], $stats['end']);
+        $location = $scope->getFeature()->getFile() . ':' . $scope->getScenario()->getLine();
 
         self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario] = $stats;
         self::$display[$suite]['features'][$feature]['scenarios'][$scenario]['time'] = $stats['final'];
+        self::$display[$suite]['features'][$feature]['scenarios'][$scenario]['location'] = $location;
     }
 
     abstract public static function getDiffInSeconds($start, $end);

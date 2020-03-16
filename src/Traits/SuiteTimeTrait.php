@@ -30,7 +30,7 @@ trait SuiteTimeTrait
         self::$snapshots[$suite] = $stats;
         self::$display[$suite]['time'] = $stats['final'];
 
-        if (self::$printToScreen) {
+        if (self::$printToScreen && self::$display) {
             self::generateOutput(self::$display);
         }
 
@@ -42,6 +42,9 @@ trait SuiteTimeTrait
     public static function generateOutput(array $display)
     {
         foreach ($display as $suite => $suiteTimes) {
+            if (!isset($suiteTimes['features'])) {
+                continue;
+            }
             self::printLine(sprintf('Suite >>> [%s] - %s', $suiteTimes['time'], $suite));
             foreach ($suiteTimes['features'] as $feature => $featureTimes) {
                 self::tab(1);
@@ -49,14 +52,18 @@ trait SuiteTimeTrait
                 foreach ($featureTimes['scenarios'] as $scenario => $scenarioTimes) {
                     self::tab(2);
                     self::printLine(sprintf('Scenario >>> [%s] - %s', $scenarioTimes['time'], $scenario));
-                    foreach ($scenarioTimes['steps'] as $step => $stepTimes) {
-                        self::tab(3);
-                        self::printLine(sprintf('Step: %s', $step));
-                        foreach ($stepTimes as $index => $time) {
-                            self::tab(4);
-                            self::printLine(sprintf('%d: %s', $index + 1, $time));
+                    if (self::$suiteReport['step']) {
+                        foreach ($scenarioTimes['steps'] as $step => $stepTimes) {
+                            self::tab(3);
+                            self::printLine(sprintf('Step: %s', $step));
+                            foreach ($stepTimes as $index => $time) {
+                                self::tab(4);
+                                self::printLine(sprintf('%d: %s', $index + 1, $time));
+                            }
                         }
                     }
+                    self::tab(2);
+                    self::printLine($scenarioTimes['location']);
                     self::newline();
                 }
             }

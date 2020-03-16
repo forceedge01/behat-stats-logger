@@ -17,6 +17,11 @@ default:
                 - Genesis\Stats\Context\StatsLoggerContext:
                     filePath: test/report/
                     printToScreen: true
+                    topReport:
+                        count: 5
+                        sortBy: maxTime
+                    suiteReport:
+                        step: true
 ```
 
 Example project available in features folder.

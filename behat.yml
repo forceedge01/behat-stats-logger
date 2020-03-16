@@ -8,6 +8,11 @@ default:
                 - Genesis\Stats\Context\StatsLoggerContext:
                     filePath: test/report/
                     printToScreen: true
+                    topReport:
+                        count: 2
+                        sortBy: cumulativeTime
+                    suiteReport:
+                        step: false
         suite-2:
             paths:
                 - %paths.base%/features/suite-2
@@ -16,3 +21,6 @@ default:
                 - Genesis\Stats\Context\StatsLoggerContext:
                     filePath: test/report/
                     printToScreen: true
+                    topReport:
+                        count: 10
+                        sortBy: cumulativeTime

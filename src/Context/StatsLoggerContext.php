@@ -16,11 +16,15 @@ class StatsLoggerContext implements Context
     private static $display = [];
     private static $printToScreen = false;
     private static $filePath = null;
+    private static $top = [];
+    private static $suiteReport = [];
 
-    public function __construct($filePath, $printToScreen = false)
+    public function __construct($filePath, $printToScreen = false, array $suiteReport = [], array $topReport = [])
     {
         self::$filePath = $filePath;
         self::$printToScreen = $printToScreen;
+        self::$suiteReport = array_merge(['step' => true], $suiteReport);
+        self::$top = array_merge(['count' => 10, 'sortBy' => 'maxTime'], $topReport);
 
         if (self::$filePath && !is_dir(self::$filePath)) {
             mkdir(self::$filePath, 0777, true);
