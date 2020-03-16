@@ -13,7 +13,7 @@ trait ScenarioTimeTrait
     {
         $suite = $scope->getSuite()->getName();
         $feature = basename($scope->getFeature()->getFile());
-        $scenario = $scope->getScenario()->getTitle();
+        $scenario = '(L' . $scope->getScenario()->getLine() . ') - ' . $scope->getScenario()->getTitle();
         self::$currentScenario = $scenario;
 
         self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario] = [
@@ -28,7 +28,7 @@ trait ScenarioTimeTrait
     {
         $suite = $scope->getSuite()->getName();
         $feature = basename($scope->getFeature()->getFile());
-        $scenario = $scope->getScenario()->getTitle();
+        $scenario = '(L' . $scope->getScenario()->getLine() . ') - ' . $scope->getScenario()->getTitle();
 
         $stats = self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario];
         $stats['end'] = microtime(true);
