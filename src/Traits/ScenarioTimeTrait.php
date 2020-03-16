@@ -17,6 +17,7 @@ trait ScenarioTimeTrait
         self::$currentScenario = $scenario;
 
         self::$snapshots[$suite]['features'][$feature]['scenarios'][$scenario] = [
+            'time' => null,
             'start' => microtime(true),
         ];
     }

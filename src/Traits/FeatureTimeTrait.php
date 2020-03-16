@@ -13,6 +13,7 @@ trait FeatureTimeTrait
         $feature = basename($scope->getFeature()->getFile());
 
         self::$snapshots[$suite]['features'][$feature] = [
+            'time' => null,
             'start' => microtime(true),
         ];
     }

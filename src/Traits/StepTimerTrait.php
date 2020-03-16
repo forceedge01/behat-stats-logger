@@ -69,10 +69,16 @@ trait StepTimerTrait
     /**
      * @AfterSuite
      */
-    public static function topTenTimeIntensiveSteps()
+    public static function topTenTimeIntensiveSteps($scope)
     {
         if (self::$steps) {
-            echo 'Top ' . self::$top['count'] . ' time intensive step defintions...' . PHP_EOL . PHP_EOL;
+            $suite = $scope->getSuite()->getName();
+            echo 'Top ' .
+                self::$top['count'] .
+                ' time intensive step definitions for suite: ' .
+                $suite .
+                PHP_EOL .
+                PHP_EOL;
 
             if (!in_array(self::$top['sortBy'], ['cumulativeTime', 'maxTime', 'count'])) {
                 throw new InvalidArgumentException('Invalid sort by param provided, allowed are: maxTime, cumulativeTime, count');
@@ -102,7 +108,7 @@ trait StepTimerTrait
         echo 'Cumulative Time: ' . $step[$stepDefinition]['cumulativeTime'] . PHP_EOL;
 
         foreach ($step[$stepDefinition]['times'] as $index => $time) {
-            echo str_repeat(' ', 4) . ($index+1) . ': ' . $time . PHP_EOL;
+            echo str_repeat(' ', 4) . ($index+1) . ': ' . self::colorCode($time, 'step') . PHP_EOL;
         }
 
         echo PHP_EOL;

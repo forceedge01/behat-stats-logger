@@ -13,6 +13,19 @@ default:
                         sortBy: cumulativeTime
                     suiteReport:
                         step: false
+                    highlight:
+                        suite:
+                            red: 5
+                            yellow: 3
+                        step:
+                            blue: 1
+                        scenario:
+                            brown: 4
+                            red: 3
+                            yellow: 2
+                            blue: 1
+                        feature:
+                            brown: 3
         suite-2:
             paths:
                 - %paths.base%/features/suite-2
@@ -24,3 +37,13 @@ default:
                     topReport:
                         count: 10
                         sortBy: cumulativeTime
+                    highlight:
+                        step:
+                            blue: 1
+                        scenario:
+                            brown: 4
+                            red: 3
+                            yellow: 2
+                            blue: 1
+                        feature:
+                            brown: 3
