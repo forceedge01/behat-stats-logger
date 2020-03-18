@@ -84,19 +84,30 @@ trait StepTimerTrait
                 throw new InvalidArgumentException('Invalid sort by param provided, allowed are: maxTime, cumulativeTime, count');
             }
 
-            $maxTimes = array_column(self::$steps, self::$top['sortBy']);
-            arsort($maxTimes);
+            $sorted = self::sortSteps(self::$top['sortBy'], self::$top['count']);
 
-            $counter = 1;
-            foreach ($maxTimes as $key => $time) {
-                if ($counter > self::$top['count']) {
-                    break;
-                }
-                $step = array_slice(self::$steps, $key, 1);
+            foreach ($sorted as $step) {
                 self::printStep($step);
-                $counter++;
             }
         }
+    }
+
+    private static function sortSteps($by, $count = null)
+    {
+        $maxTimes = array_column(self::$steps, $by);
+        arsort($maxTimes);
+
+        $sorted = [];
+        $counter = 1;
+        foreach ($maxTimes as $key => $time) {
+            if ($count!== null && $counter > $count) {
+                break;
+            }
+            $sorted[] = array_slice(self::$steps, $key, 1);
+            $counter++;
+        }
+
+        return $sorted;
     }
 
     private static function printStep(array $step)

@@ -7,10 +7,3 @@ Feature:
         Given I am on a page
         When I trigger some action
         Then I should receive some output
-
-    Scenario: Yet another scenario with a title
-        Given I am on a page
-        When I trigger some action
-        And I trigger some action
-        Then I should receive some output
-        And I should receive some output

@@ -32,7 +32,7 @@ trait SuiteTimeTrait
         self::$display[$suite]['time'] = $stats['final'];
 
         if (self::$printToScreen && self::$display) {
-            self::generateOutput(self::$display);
+            self::generateOutput($suite, self::$display[$suite]);
         }
 
         $suiteReport = [];
@@ -40,8 +40,33 @@ trait SuiteTimeTrait
             self::printLine('Suite summary report:');
             self::newline();
             foreach (self::$display as $suite => $stats) {
-                $suiteReport[$suite] = $stats['time'];
-                self::printLine('[' . self::colorCode($stats['time'], 'suite') . '] - ' . $suite);
+                $suiteReport[$suite]['time'] = $stats['time'];
+                $featuresTimeSum = self::getTotalTime($stats['features']);
+                $suiteReport[$suite]['features']['time'] = $featuresTimeSum;
+                $suiteReport[$suite]['features']['count'] = count($stats['features']);
+
+                $scenarios = array_column($stats['features'], 'scenarios');
+                $scenariosFlattened = self::arrayFlatten($scenarios);
+                $scenariosTimeSum = self::getTotalTime($scenariosFlattened);
+                $suiteReport[$suite]['scenarios']['time'] = $scenariosTimeSum;
+                $suiteReport[$suite]['scenarios']['count'] = count($scenariosFlattened);
+
+                $steps = array_column($scenariosFlattened, 'steps');
+                $stepsFlattened = self::arrayFlatten($steps, 2);
+                $stepsTimeSum = array_sum(array_map(function($value) {
+                    return self::convertStringTimeToSeconds($value);
+                }, $stepsFlattened));
+                $suiteReport[$suite]['steps']['time'] = $stepsTimeSum;
+                $suiteReport[$suite]['steps']['count'] = count($stepsFlattened);
+
+                self::printLine('Suite: [' . self::colorCode($stats['time'], 'suite') . '] - ' . $suite);
+                self::tab(1);
+                self::printLine('Feature(s): [' . $featuresTimeSum . '] - count: ' . count($stats['features']));
+                self::tab(2);
+                self::printLine('Scenario(s): [' . $scenariosTimeSum . '] - count: ' . count($scenariosFlattened));
+                self::tab(3);
+                self::printLine('Step(s): [' . $stepsTimeSum . '] - count: ' . count($stepsFlattened));
+                self::newline();
             }
         }
 
@@ -49,7 +74,9 @@ trait SuiteTimeTrait
             foreach (self::$display as $suite => $stats) {
                 file_put_contents(self::$filePath . self::getName('suite-report', $suite), json_encode($stats));
             }
-            file_put_contents(self::$filePath . self::getName('steps-report', $suite), json_encode(self::$steps));
+
+            $steps = isset(self::$top['sortBy']) ? self::sortSteps(self::$top['sortBy']) : self::$steps;
+            file_put_contents(self::$filePath . self::getName('steps-report', $suite), json_encode($steps));
 
             if (self::$suiteReport['suiteSummary']) {
                 file_put_contents(self::$filePath . self::getName('suite', 'summary report'), json_encode($suiteReport));
@@ -57,43 +84,56 @@ trait SuiteTimeTrait
         }
     }
 
+    private static function getTotalTime($array)
+    {
+        $features = array_column($array, 'time');
+
+        return array_sum(array_map(function($val) {
+            return self::convertStringTimeToSeconds($val);
+        }, $features));
+    }
+
     private static function getName($type, $suiteName)
     {
         return '/' . $type . '-' . str_replace(' ', '-', $suiteName) . '.json';
     }
 
-    public static function generateOutput(array $display)
+    public static function generateOutput($suite, array $suiteTimes)
     {
-        foreach ($display as $suite => $suiteTimes) {
-            if (!isset($suiteTimes['features'])) {
+        if (!isset($suiteTimes['features'])) {
+            continue;
+        }
+        self::printLine(sprintf('Suite >>> [%s] - %s', self::colorCode($suiteTimes['time'], 'suite'), $suite));
+        foreach ($suiteTimes['features'] as $feature => $featureTimes) {
+            if (!isset($featureTimes['scenarios'])) {
                 continue;
             }
-            self::printLine(sprintf('Suite >>> [%s] - %s', self::colorCode($suiteTimes['time'], 'suite'), $suite));
-            foreach ($suiteTimes['features'] as $feature => $featureTimes) {
-                if (!isset($featureTimes['scenarios'])) {
-                    continue;
-                }
-                self::tab(1);
-                self::printLine(sprintf('Feature >>> [%s] - %s', self::colorCode($featureTimes['time'], 'feature'), $feature));
-                foreach ($featureTimes['scenarios'] as $scenario => $scenarioTimes) {
-                    self::tab(2);
-                    self::printLine(sprintf('Scenario >>> [%s] - %s', self::colorCode($scenarioTimes['time'], 'scenario'), $scenario));
-                    if (self::$suiteReport['step'] && isset($scenarioTimes['steps'])) {
-                        foreach ($scenarioTimes['steps'] as $step => $stepTimes) {
-                            self::tab(3);
-                            self::printLine(sprintf('Step: %s', $step));
-                            foreach ($stepTimes as $index => $time) {
-                                self::tab(4);
-                                self::printLine(sprintf('%d: %s', $index + 1, self::colorCode($time, 'step')));
-                            }
+            self::tab(1);
+            self::printLine(sprintf('Feature >>> [%s] - %s', self::colorCode($featureTimes['time'], 'feature'), $feature));
+            foreach ($featureTimes['scenarios'] as $scenario => $scenarioTimes) {
+                self::tab(2);
+                self::printLine(sprintf('Scenario >>> [%s] - %s', self::colorCode($scenarioTimes['time'], 'scenario'), $scenario));
+                if (self::$suiteReport['step'] && isset($scenarioTimes['steps'])) {
+                    foreach ($scenarioTimes['steps'] as $step => $stepTimes) {
+                        self::tab(3);
+                        self::printLine(sprintf('Step: %s', $step));
+                        foreach ($stepTimes as $index => $time) {
+                            self::tab(4);
+                            self::printLine(sprintf('%d: %s', $index + 1, self::colorCode($time, 'step')));
                         }
                     }
-                    self::tab(2);
-                    self::printLine($scenarioTimes['location']);
-                    self::newline();
                 }
+                self::tab(2);
+                self::printLine($scenarioTimes['location']);
+                self::newline();
             }
         }
+    }
+
+    private static function convertStringTimeToSeconds($string)
+    {
+        list($hours, $minutes, $seconds) = explode(':', $string);
+        return ((int) $hours*24*60) + ((int) $minutes*60) + (float) $seconds;
     }
 
     private static function colorCode($string, $type)
@@ -102,8 +142,7 @@ trait SuiteTimeTrait
             return $string;
         }
 
-        list($hours, $minutes, $seconds) = explode(':', $string);
-        $inSeconds = ((int) $hours*24*60) + ((int) $minutes*60) + (float) $seconds;
+        $inSeconds = self::convertStringTimeToSeconds($string);
 
         asort(self::$highlight[$type]);
         $color = null;
@@ -150,5 +189,26 @@ trait SuiteTimeTrait
     public static function tab($int)
     {
         echo str_repeat(' ', 4*$int);
+    }
+
+    private function arrayFlatten($array, $level = 1)
+    {
+        for ($i = 0; $i < $level; $i++) {
+            $array = self::flattenOnce($array);
+        }
+
+        return $array;
+    }
+
+    private function flattenOnce($array)
+    {
+        $return = [];
+        foreach ($array as $arr) {
+            foreach ($arr as $value) {
+                $return[] = $value;
+            }
+        }
+
+        return $return;
     }
 }
