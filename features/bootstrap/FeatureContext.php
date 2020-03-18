@@ -23,7 +23,7 @@ class FeatureContext implements Context
      */
     public function iAmOnAPage()
     {
-        usleep(1500000);
+        usleep(700000);
     }
 
     /**
@@ -31,7 +31,7 @@ class FeatureContext implements Context
      */
     public function iTriggerSomeAction()
     {
-        usleep(630000);
+        usleep(315000);
     }
 
     /**
@@ -39,6 +39,6 @@ class FeatureContext implements Context
      */
     public function iShouldReceiveSomeOutput()
     {
-        usleep(1370000);
+        usleep(270000);
     }
 }

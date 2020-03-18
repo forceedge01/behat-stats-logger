@@ -1,1 +1,1 @@
-{"suite-1":{"time":"00:00:12.61","features":{"time":12.6,"count":2},"scenarios":{"time":12.58,"count":3},"steps":{"time":12.51,"count":11}},"suite-2":{"time":"00:00:03.53","features":{"time":3.53,"count":3},"scenarios":{"time":3.52,"count":2},"steps":{"time":3.5,"count":3}}}
+{"suite-1":{"time":"00:00:00.00","features":{"time":0,"count":0},"scenarios":{"time":0,"count":0},"steps":{"time":0,"count":0}},"suite-2":{"time":"00:00:00.01","features":{"time":0,"count":2},"scenarios":{"time":0,"count":1},"steps":{"time":0,"count":0}}}

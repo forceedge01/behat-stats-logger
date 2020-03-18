@@ -36,32 +36,45 @@ trait SuiteTimeTrait
         }
 
         $suiteReport = [];
-        if (self::$suiteReport['suiteSummary']) {
+        if (isset(self::$suiteReport['suiteSummary'])) {
             self::printLine('Suite summary report:');
             self::newline();
             foreach (self::$display as $suite => $stats) {
                 $suiteReport[$suite]['time'] = $stats['time'];
-                $featuresTimeSum = self::getTotalTime($stats['features']);
+                $featuresTimeSum = 0;
+                $featuresFlattened = [];
+                if (isset($stats['features']) && is_array($stats['features'])) {
+                    $featuresFlattened = $stats['features'];
+                    $featuresTimeSum = self::getTotalTime($featuresFlattened);
+                }
                 $suiteReport[$suite]['features']['time'] = $featuresTimeSum;
-                $suiteReport[$suite]['features']['count'] = count($stats['features']);
+                $suiteReport[$suite]['features']['count'] = count($featuresFlattened);
 
-                $scenarios = array_column($stats['features'], 'scenarios');
-                $scenariosFlattened = self::arrayFlatten($scenarios);
-                $scenariosTimeSum = self::getTotalTime($scenariosFlattened);
+                $scenarios = array_column($featuresFlattened, 'scenarios');
+                $scenariosFlattened = [];
+                $scenariosTimeSum = 0;
+                if (isset($scenarios[0])) {
+                    $scenariosFlattened = self::arrayFlatten($scenarios);
+                    $scenariosTimeSum = self::getTotalTime($scenariosFlattened);
+                }
                 $suiteReport[$suite]['scenarios']['time'] = $scenariosTimeSum;
                 $suiteReport[$suite]['scenarios']['count'] = count($scenariosFlattened);
 
                 $steps = array_column($scenariosFlattened, 'steps');
-                $stepsFlattened = self::arrayFlatten($steps, 2);
-                $stepsTimeSum = array_sum(array_map(function($value) {
-                    return self::convertStringTimeToSeconds($value);
-                }, $stepsFlattened));
+                $stepsFlattened = [];
+                $stepsTimeSum = 0;
+                if (isset($steps[0])) {
+                    $stepsFlattened = self::arrayFlatten($steps, 2);
+                    $stepsTimeSum = array_sum(array_map(function($value) {
+                        return self::convertStringTimeToSeconds($value);
+                    }, $stepsFlattened));
+                }
                 $suiteReport[$suite]['steps']['time'] = $stepsTimeSum;
                 $suiteReport[$suite]['steps']['count'] = count($stepsFlattened);
 
                 self::printLine('Suite: [' . self::colorCode($stats['time'], 'suite') . '] - ' . $suite);
                 self::tab(1);
-                self::printLine('Feature(s): [' . $featuresTimeSum . '] - count: ' . count($stats['features']));
+                self::printLine('Feature(s): [' . $featuresTimeSum . '] - count: ' . count($featuresFlattened));
                 self::tab(2);
                 self::printLine('Scenario(s): [' . $scenariosTimeSum . '] - count: ' . count($scenariosFlattened));
                 self::tab(3);
@@ -86,11 +99,11 @@ trait SuiteTimeTrait
 
     private static function getTotalTime($array)
     {
-        $features = array_column($array, 'time');
+        $times = array_column($array, 'time');
 
         return array_sum(array_map(function($val) {
             return self::convertStringTimeToSeconds($val);
-        }, $features));
+        }, $times));
     }
 
     private static function getName($type, $suiteName)

@@ -1,3 +1,4 @@
+@empty
 Feature:
     In order to analyse an existing test suite
     As a QA engineer
