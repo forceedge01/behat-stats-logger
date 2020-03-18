@@ -101,7 +101,7 @@ trait SuiteTimeTrait
     public static function generateOutput($suite, array $suiteTimes)
     {
         if (!isset($suiteTimes['features'])) {
-            continue;
+            return;
         }
         self::printLine(sprintf('Suite >>> [%s] - %s', self::colorCode($suiteTimes['time'], 'suite'), $suite));
         foreach ($suiteTimes['features'] as $feature => $featureTimes) {
