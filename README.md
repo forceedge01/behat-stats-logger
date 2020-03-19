@@ -43,6 +43,7 @@ default:
 
 Example project available in features folder.
 
+```
 filePath (string): Set where the reports are to be generated.
 printToScreen (boolean): Whether to produce console output or not.
 topReport (array):
@@ -53,8 +54,10 @@ suiteReport (array):
 highlight (array):
     <type> (array):
         <color> (int): Number of seconds as the limit. Anything above the limit will be highlighted by the color.
+```
 
 type in (suite, feature, scenario, step)
+
 color in (red, brow, blue, yellow, green, white)
 
 Suite report:
