@@ -71,7 +71,7 @@ trait StepTimerTrait
      */
     public static function topTenTimeIntensiveSteps($scope)
     {
-        if (self::$steps) {
+        if (self::get(self::$top, 'enabled') && self::$printToScreen && self::$steps) {
             $suite = $scope->getSuite()->getName();
             echo 'Top ' .
                 self::$top['count'] .

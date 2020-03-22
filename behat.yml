@@ -9,10 +9,14 @@ default:
                     filePath: test/report/
                     printToScreen: true
                     topReport:
+                        enabled: true
                         count: 2
                         sortBy: cumulativeTime
                     suiteReport:
+                        enabled: true
                         step: false
+                    suiteSummary:
+                        enabled: true
                     highlight:
                         suite:
                             red: 5
@@ -33,10 +37,15 @@ default:
                 - FeatureContext
                 - Genesis\Stats\Context\StatsLoggerContext:
                     filePath: test/report/
-                    printToScreen: true
+                    printToScreen: false
                     topReport:
+                        enabled: true
                         count: 10
                         sortBy: cumulativeTime
+                    suiteSummary:
+                        enabled: true
+                    suiteReport:
+                        enabled: true
                     highlight:
                         step:
                             blue: 1

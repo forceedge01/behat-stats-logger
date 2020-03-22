@@ -4,6 +4,8 @@ namespace Genesis\Stats\Traits;
 
 trait SuiteTimeTrait
 {
+    private static $cleanedPath = false;
+
     /**
      * @BeforeSuite
      */
@@ -31,47 +33,72 @@ trait SuiteTimeTrait
         self::$snapshots[$suite] = $stats;
         self::$display[$suite]['time'] = $stats['final'];
 
-        if (self::$printToScreen && self::$display) {
-            self::generateOutput($suite, self::$display[$suite]);
+        if (self::get(self::$suiteReport, 'enabled') && self::$printToScreen && self::$display) {
+            self::generateSuiteReportOutput($suite, self::$display[$suite]);
         }
 
+        $suiteReport = self::generateSuiteSummaryReport(self::$display);
+
+        if (self::$filePath) {
+            if (self::get(self::$suiteReport, 'enabled')) {
+                foreach (self::$display as $suite => $stats) {
+                    self::generateReport('suite-report', $suite, $stats);
+                }
+            }
+
+            if (self::get(self::$top, 'enabled')) {
+                $steps = isset(self::$top['sortBy']) ? self::sortSteps(self::$top['sortBy']) : self::$steps;
+                self::generateReport('steps-report', $suite, $steps);
+            }
+
+            if (self::get(self::$suiteSummary, 'enabled') && self::$suiteReport['suiteSummary']) {
+                self::generateReport('suite-summary-report', $suite, $suiteReport);
+            }
+        }
+    }
+
+    private static function generateSuiteSummaryReport($data)
+    {
         $suiteReport = [];
-        if (isset(self::$suiteReport['suiteSummary'])) {
+
+        if (self::get(self::$suiteSummary, 'enabled') && self::$printToScreen) {
             self::printLine('Suite summary report:');
             self::newline();
-            foreach (self::$display as $suite => $stats) {
-                $suiteReport[$suite]['time'] = $stats['time'];
-                $featuresTimeSum = 0;
-                $featuresFlattened = [];
-                if (isset($stats['features']) && is_array($stats['features'])) {
-                    $featuresFlattened = $stats['features'];
-                    $featuresTimeSum = self::getTotalTime($featuresFlattened);
-                }
-                $suiteReport[$suite]['features']['time'] = $featuresTimeSum;
-                $suiteReport[$suite]['features']['count'] = count($featuresFlattened);
+        }
+        foreach ($data as $suite => $stats) {
+            $suiteReport[$suite]['time'] = $stats['time'];
+            $featuresTimeSum = 0;
+            $featuresFlattened = [];
+            if (isset($stats['features']) && is_array($stats['features'])) {
+                $featuresFlattened = $stats['features'];
+                $featuresTimeSum = self::getTotalTime($featuresFlattened);
+            }
+            $suiteReport[$suite]['features']['time'] = $featuresTimeSum;
+            $suiteReport[$suite]['features']['count'] = count($featuresFlattened);
 
-                $scenarios = array_column($featuresFlattened, 'scenarios');
-                $scenariosFlattened = [];
-                $scenariosTimeSum = 0;
-                if (isset($scenarios[0])) {
-                    $scenariosFlattened = self::arrayFlatten($scenarios);
-                    $scenariosTimeSum = self::getTotalTime($scenariosFlattened);
-                }
-                $suiteReport[$suite]['scenarios']['time'] = $scenariosTimeSum;
-                $suiteReport[$suite]['scenarios']['count'] = count($scenariosFlattened);
+            $scenarios = array_column($featuresFlattened, 'scenarios');
+            $scenariosFlattened = [];
+            $scenariosTimeSum = 0;
+            if (isset($scenarios[0])) {
+                $scenariosFlattened = self::arrayFlatten($scenarios);
+                $scenariosTimeSum = self::getTotalTime($scenariosFlattened);
+            }
+            $suiteReport[$suite]['scenarios']['time'] = $scenariosTimeSum;
+            $suiteReport[$suite]['scenarios']['count'] = count($scenariosFlattened);
 
-                $steps = array_column($scenariosFlattened, 'steps');
-                $stepsFlattened = [];
-                $stepsTimeSum = 0;
-                if (isset($steps[0])) {
-                    $stepsFlattened = self::arrayFlatten($steps, 2);
-                    $stepsTimeSum = array_sum(array_map(function($value) {
-                        return self::convertStringTimeToSeconds($value);
-                    }, $stepsFlattened));
-                }
-                $suiteReport[$suite]['steps']['time'] = $stepsTimeSum;
-                $suiteReport[$suite]['steps']['count'] = count($stepsFlattened);
+            $steps = array_column($scenariosFlattened, 'steps');
+            $stepsFlattened = [];
+            $stepsTimeSum = 0;
+            if (isset($steps[0])) {
+                $stepsFlattened = self::arrayFlatten($steps, 2);
+                $stepsTimeSum = array_sum(array_map(function($value) {
+                    return self::convertStringTimeToSeconds($value);
+                }, $stepsFlattened));
+            }
+            $suiteReport[$suite]['steps']['time'] = $stepsTimeSum;
+            $suiteReport[$suite]['steps']['count'] = count($stepsFlattened);
 
+            if (self::get(self::$suiteSummary, 'enabled') && self::$printToScreen) {
                 self::printLine('Suite: [' . self::colorCode($stats['time'], 'suite') . '] - ' . $suite);
                 self::tab(1);
                 self::printLine('Feature(s): [' . $featuresTimeSum . '] - count: ' . count($featuresFlattened));
@@ -83,18 +110,12 @@ trait SuiteTimeTrait
             }
         }
 
-        if (self::$filePath) {
-            foreach (self::$display as $suite => $stats) {
-                file_put_contents(self::$filePath . self::getName('suite-report', $suite), json_encode($stats));
-            }
+        return $suiteReport;
+    }
 
-            $steps = isset(self::$top['sortBy']) ? self::sortSteps(self::$top['sortBy']) : self::$steps;
-            file_put_contents(self::$filePath . self::getName('steps-report', $suite), json_encode($steps));
-
-            if (self::$suiteReport['suiteSummary']) {
-                file_put_contents(self::$filePath . self::getName('suite', 'summary report'), json_encode($suiteReport));
-            }
-        }
+    private static function generateReport($type, $name, $data)
+    {
+        file_put_contents(str_replace('//', '/', self::$filePath . self::getName($type, $name)), json_encode($data));
     }
 
     private static function getTotalTime($array)
@@ -111,7 +132,7 @@ trait SuiteTimeTrait
         return '/' . $type . '-' . str_replace(' ', '-', $suiteName) . '.json';
     }
 
-    public static function generateOutput($suite, array $suiteTimes)
+    public static function generateSuiteReportOutput($suite, array $suiteTimes)
     {
         if (!isset($suiteTimes['features'])) {
             return;

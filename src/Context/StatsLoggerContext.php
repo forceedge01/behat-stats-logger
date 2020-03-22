@@ -18,6 +18,7 @@ class StatsLoggerContext implements Context
     private static $filePath = null;
     private static $top = [];
     private static $suiteReport = [];
+    private static $suiteSummary = [];
     private static $highlight;
 
     public function __construct(
@@ -25,6 +26,7 @@ class StatsLoggerContext implements Context
         $printToScreen = false,
         array $suiteReport = [],
         array $topReport = [],
+        array $suiteSummary = [],
         array $highlight = []
     ) {
         self::$filePath = $filePath;
@@ -32,8 +34,16 @@ class StatsLoggerContext implements Context
         self::$suiteReport = array_merge([
             'step' => true,
             'suiteSummary' => true,
+            'enabled' => true
         ], $suiteReport);
-        self::$top = array_merge(['count' => 10, 'sortBy' => 'maxTime'], $topReport);
+        self::$top = array_merge([
+            'count' => 10,
+            'sortBy' => 'maxTime',
+            'enabled' => true
+        ], $topReport);
+        self::$suiteSummary = array_merge([
+            'enabled' => true,
+        ], $suiteSummary);
         self::$highlight = $highlight;
 
         if (self::$filePath && !is_dir(self::$filePath)) {
@@ -48,5 +58,14 @@ class StatsLoggerContext implements Context
         $micro = $diff - $sec;
 
         return strftime('%T', mktime(0, 0, $sec)) . str_replace('0.', '.', sprintf('%.2f', $micro));
+    }
+
+    public static function get($array, $key, $default = null)
+    {
+        if (array_key_exists($key, $array)) {
+            return $array[$key];
+        }
+
+        return $default;
     }
 }
