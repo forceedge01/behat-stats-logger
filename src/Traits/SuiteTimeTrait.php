@@ -51,8 +51,8 @@ trait SuiteTimeTrait
                 self::generateReport('steps-report', $suite, $steps);
             }
 
-            if (self::get(self::$suiteSummary, 'enabled') && self::$suiteReport['suiteSummary']) {
-                self::generateReport('suite-summary-report', $suite, $suiteReport);
+            if (self::get(self::$suiteSummary, 'enabled')) {
+                self::generateReport('suite-summary', 'report', $suiteReport);
             }
         }
     }

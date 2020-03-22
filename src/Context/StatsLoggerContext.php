@@ -33,7 +33,6 @@ class StatsLoggerContext implements Context
         self::$printToScreen = $printToScreen;
         self::$suiteReport = array_merge([
             'step' => true,
-            'suiteSummary' => true,
             'enabled' => true
         ], $suiteReport);
         self::$top = array_merge([

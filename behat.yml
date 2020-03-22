@@ -37,7 +37,7 @@ default:
                 - FeatureContext
                 - Genesis\Stats\Context\StatsLoggerContext:
                     filePath: test/report/
-                    printToScreen: false
+                    printToScreen: true
                     topReport:
                         enabled: true
                         count: 10

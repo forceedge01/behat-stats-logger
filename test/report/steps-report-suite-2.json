@@ -1,1 +1,1 @@
-[]
+[{"I am on a page":{"count":1,"maxTime":0.70179605484009,"cumulativeTime":0.70179605484009,"times":["00:00:00.70"]}},{"I trigger some action":{"count":1,"maxTime":0.31780791282654,"cumulativeTime":0.31780791282654,"times":["00:00:00.32"]}},{"I should receive some output":{"count":1,"maxTime":0.27194499969482,"cumulativeTime":0.27194499969482,"times":["00:00:00.27"]}}]
